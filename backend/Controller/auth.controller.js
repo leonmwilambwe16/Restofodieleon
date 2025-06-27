@@ -11,11 +11,11 @@ const REFRESH_TOKEN = process.env.REFRESH_TOKEN_SECRET;
 
 const generateAccessToken = (userId) =>{
   return jwt.sign({userId}, ACCESS_TOKEN, {expiresIn:"15m"})
-}
+};
 
 const generateRefreshToken = (userId) =>{
   return jwt.sign({userId}, REFRESH_TOKEN, {expiresIn:"7d"})
-}
+};
 
 export const Signup =  async(req,res)=>{
 const {name,email,password,role} = req.body;
