@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./Sinup.css";
+import "../Components/Sinup.css"
 import { useAuth } from "../context/AuthContext";
 
 function Signup() {
