@@ -15,7 +15,7 @@ function CartPage() {
 
   if (loading) {
     return <p>Loading cart...</p>;
-  }
+  };
 
   return (
     <div className="cart-page">
