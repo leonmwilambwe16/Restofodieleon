@@ -4,6 +4,8 @@ import '../pages/Food.css'
 import Data from './data/data'
 import { useCart } from '../context/CartContext';
 
+const url = "https://restofodieleon-backend.onrender.com";
+
 function Food (){
    const [products, setProducts] = useState([]);
    const [searchTerm, setSearchTerm] = useState('');
@@ -14,7 +16,7 @@ function Food (){
    
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
-    axios.get('http://localhost:4005/api/products',{
+    axios.get(`${url}/api/products`,{
         headers: {
           Authorization: `Bearer ${token}`, 
         },

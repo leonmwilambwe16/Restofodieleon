@@ -6,6 +6,13 @@ const CartContext = createContext();
 
 export const useCart = () => useContext(CartContext);
 
+ const url= "https://restofodieleon-backend.onrender.com";
+ 
+  const api = axios.create({
+  baseURL: url,
+  withCredentials: true, 
+});
+
 export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
   const { accessToken } = useAuth();
@@ -13,7 +20,7 @@ export const CartProvider = ({ children }) => {
 const fetchCart = async () => {
     try {
       const token = localStorage.getItem("accessToken");
-      const response = await axios.get("http://localhost:4005/api/cart", {
+      const response = await api.get("/api/cart", {
         headers: { Authorization: `Bearer ${token}` },
       });
       console.log("Fetched cart:", response.data);
@@ -27,7 +34,7 @@ const fetchCart = async () => {
     const token = localStorage.getItem("accessToken");
     try {
       console.log("Adding item to cart:", product._id);
-      await axios.post("http://localhost:4005/api/cart", { productId: product._id }, {
+      await api.post("/api/cart", { productId: product._id }, {
         headers: { Authorization: `Bearer ${token}` },
       });
       await fetchCart(); 
@@ -39,7 +46,7 @@ const fetchCart = async () => {
   const updateQuantity = async (productId, newQty) => {
     if (!accessToken || newQty < 1) return;
     try {
-      await axios.post("http://localhost:4005/api/cart", {
+      await api.post("/api/cart", {
         productId,
         quantity: newQty,
       }, {

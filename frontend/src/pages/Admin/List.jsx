@@ -1,6 +1,8 @@
 import React , { useEffect, useState } from 'react';
 import axios from 'axios';
-import '../Admin/List.css'
+import '../Admin/List.css';
+
+const url = "https://restofodieleon-backend.onrender.com";
 
 function List (){
   const [products, setProducts] = useState([]);
@@ -9,7 +11,7 @@ function List (){
     const fetchProducts = async () => {
       try {
          const token = localStorage.getItem('accessToken');
-        const response = await axios.get('http://localhost:4005/api/products',{
+        const response = await axios.get(`${url}/api/products`,{
         headers: {
           Authorization: `Bearer ${token}`
         },
@@ -27,7 +29,7 @@ function List (){
   const handleDelete = async (id) => {
     try {
       const token = localStorage.getItem('accessToken');
-      await axios.delete(`http://localhost:4005/api/products/${id}`,{
+      await axios.delete(`${url}/api/products/${id}`,{
         headers: {
           Authorization: `Bearer ${token}`,
         },

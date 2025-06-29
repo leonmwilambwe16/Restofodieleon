@@ -2,6 +2,8 @@ import React , { useState } from 'react';
 import axios from 'axios';
 import '../Admin/Add.css';
 
+const url = "https://restofodieleon-backend.onrender.com";
+
 function Add (){
     const [product, setProduct] = useState({ name: '', description: '', price: '', category: '', image: null });
   const [imagePreview, setImagePreview] = useState(null);
@@ -30,7 +32,7 @@ const categories = ['popular', 'salade', 'spagetti', 'pizza', 'rice', 'meat'];
   const token = localStorage.getItem("accessToken"); 
    console.log("Token:", token);
   try {
-    const res = await axios.post("http://localhost:4005/api/products", formData, {
+    const res = await axios.post(`${url}/api/products`, formData, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "multipart/form-data"

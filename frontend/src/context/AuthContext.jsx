@@ -4,10 +4,17 @@ import axios from 'axios';
 const AuthContext = createContext();
 
 export const useAuth =()=> useContext(AuthContext);
+ const url= "https://restofodieleon-backend.onrender.com";
+
+ const api = axios.create({
+  baseURL: url,
+  withCredentials: true, 
+});
 
 export const AuthProvider = ({children})=>{
   const [user, setUser] = useState(null); 
   const [accessToken, setAccessToken] = useState(null);
+ 
 
    useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem('user'));
@@ -19,7 +26,7 @@ export const AuthProvider = ({children})=>{
   }, []);
   const login = async (email, password) => {
     try {
-      const res = await axios.post('http://localhost:4005/api/auth/login', { email, password }, { withCredentials: true });
+      const res = await api.post('/api/auth/login', { email, password }, { withCredentials: true });
       setUser(res.data.user);
       setAccessToken(res.data.accessToken);
       localStorage.setItem('user', JSON.stringify(res.data.user));
@@ -32,7 +39,7 @@ export const AuthProvider = ({children})=>{
 
    const signup = async ({ name, email, password, role = 'customer' }) => {
     try {
-          const res = await axios.post('http://localhost:4005/api/auth/signup', { name, email, password, role });
+          const res = await api.post('/api/auth/signup', { name, email, password, role });
        console.log("Signup success:", res.data);
       return { success: true };
     } catch (err) {
@@ -42,7 +49,7 @@ export const AuthProvider = ({children})=>{
   };
 
    const logout = async () => {
-    await axios.post('http://localhost:4005/api/auth/logout', {}, { withCredentials: true });
+    await api.post('/api/auth/logout', {}, { withCredentials: true });
     setUser(null);
     setAccessToken(null);
     localStorage.removeItem('user');
