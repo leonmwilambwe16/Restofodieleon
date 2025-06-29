@@ -17,7 +17,7 @@ const PORT = process.env.PORT || 4005;
 
 
 app.use(cors({
-   origin: 'http://localhost:5174', 
+   origin: ['http://localhost:5174', 'https://restofodieleon-frontend.onrender.com'], 
   credentials: true,
 }));
 app.use(express.json({limit:"10mb"}));
