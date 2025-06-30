@@ -3,41 +3,44 @@ import { useAuth } from "./AuthContext";
 import axios from "axios";
 
 const CartContext = createContext();
-
 export const useCart = () => useContext(CartContext);
 
- const url= "https://restofodieleon-backend.onrender.com";
- 
-  const api = axios.create({
-  baseURL: url,
-  withCredentials: true, 
+const API_URL = "https://restofodieleon-backend.onrender.com/api";
+
+const api = axios.create({
+  baseURL: API_URL,
+  withCredentials: true,
 });
 
 export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
   const { accessToken } = useAuth();
 
-const fetchCart = async () => {
+  const getAuthHeaders = () => ({
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+
+  const fetchCart = async () => {
+    if (!accessToken) {
+      setCart([]);
+      return;
+    }
     try {
-      const token = localStorage.getItem("accessToken");
-      const response = await api.get("/api/cart", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get("/cart", getAuthHeaders());
       console.log("Fetched cart:", response.data);
-      setCart(response.data); 
+      setCart(response.data);
     } catch (error) {
       console.error("Failed to fetch cart:", error.message);
+      setCart([]);
     }
   };
 
-   const addToCart = async (product) => {
-    const token = localStorage.getItem("accessToken");
+  const addToCart = async (product) => {
+    if (!accessToken) return;
     try {
       console.log("Adding item to cart:", product._id);
-      await api.post("/api/cart", { productId: product._id }, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      await fetchCart(); 
+      await api.post("/cart", { productId: product._id }, getAuthHeaders());
+      await fetchCart();
     } catch (error) {
       console.error("Failed to add to cart:", error.message);
     }
@@ -46,12 +49,11 @@ const fetchCart = async () => {
   const updateQuantity = async (productId, newQty) => {
     if (!accessToken || newQty < 1) return;
     try {
-      await api.post("/api/cart", {
-        productId,
-        quantity: newQty,
-      }, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
+      await api.post(
+        "/cart",
+        { productId, quantity: newQty },
+        getAuthHeaders()
+      );
       await fetchCart();
     } catch (error) {
       console.error("Error updating quantity:", error.message);
@@ -71,13 +73,18 @@ const fetchCart = async () => {
       await updateQuantity(id, item.quantity - 1);
     }
   };
+
   const getTotalPrice = () => {
     return cart.reduce((total, item) => total + item.price * item.quantity, 0);
   };
 
   useEffect(() => {
-    fetchCart();
-  }, []);
+    if (accessToken) {
+      fetchCart();
+    } else {
+      setCart([]); 
+    }
+  }, [accessToken]);
 
   return (
     <CartContext.Provider

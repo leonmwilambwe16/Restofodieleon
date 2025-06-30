@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./Signup.css"
+import "./Signup.css";
 import { useAuth } from "../context/AuthContext";
 
 function Signup() {
@@ -14,6 +14,12 @@ function Signup() {
 
   const navigate = useNavigate();
 
+  
+  const handleInputChange = (setter) => (e) => {
+    setError("");
+    setter(e.target.value);
+  };
+
   const handleSignup = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -22,6 +28,7 @@ function Signup() {
     const res = await signup({ name, email, password, role });
 
     setLoading(false);
+
     if (res.success) {
       alert("Signup successful. Please login.");
       navigate("/login");
@@ -39,21 +46,21 @@ function Signup() {
           placeholder="Name"
           value={name}
           required
-          onChange={(e) => setName(e.target.value)}
+          onChange={handleInputChange(setName)}
         />
         <input
           type="email"
           placeholder="Email"
           value={email}
           required
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={handleInputChange(setEmail)}
         />
         <input
           type="password"
           placeholder="Password"
           value={password}
           required
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={handleInputChange(setPassword)}
         />
         <select value={role} onChange={(e) => setRole(e.target.value)}>
           <option value="customer">User</option>
