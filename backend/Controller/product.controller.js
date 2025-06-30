@@ -16,35 +16,43 @@ const uploadFromBuffer = (buffer) => {
 };
 
 
-export const getAllProducts = async (req,res)=>{
+export const getAllProducts = async (req, res) => {
   try {
-    const products = await Product.find({});
-    res.json({products})
+    const page = parseInt(req.query.page) || 1;
+    const limit = 12;
+    const skip = (page - 1) * limit;
+
+    const products = await Product.find().skip(skip).limit(limit);
+    const total = await Product.countDocuments();
+
+    res.json({
+      products,
+      page,
+      totalPages: Math.ceil(total / limit),
+      total
+    });
   } catch (error) {
-    console.log("Error in getAllProducts:",error);
-    res.status(500).json({message:"Internal server error while fetching products"})
+    console.log("Error in getAllProducts:", error);
+    res.status(500).json({ message: "Internal server error while fetching products" });
   }
 };
-export const getPopularProducts = async (req,res)=>{
+
+export const getPopularProducts = async (req, res) => {
   try {
     const product = await Product.aggregate([
+      { $match: { isPopular: true } },
+      { $sample: { size: 4 } },
       {
-        $sample:{size:4}
-      },
-      {
-        $match:{isPopular:true}
-      },
-      {
-        $project:{
-          _id:1,
-          name:1,
-          price:1,
-          description:1,
-          image:1,
-          category:1
+        $project: {
+          _id: 1,
+          name: 1,
+          price: 1,
+          description: 1,
+          image: 1,
+          category: 1
         }
       }
-    ])
+    ]);
     res.json(product);
   } catch (error) {
     console.log("Error in getPopularProducts:", error);
@@ -72,26 +80,28 @@ export const createProducts = async (req,res)=>{
     res.status(500).json({ message: "Internal server error while creating product" });
   }
 };
-export const deleteProducts = async (req,res)=>{
+export const deleteProducts = async (req, res) => {
   try {
-    const product = await Product.findByIdAndDelete(req.params.id);
-    if(!product){
-      return res.status(404).json({message:"Product not found"});
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
     }
-    if(product.image){
+
+  
+    if (product.image) {
       const publicId = product.image.split("/").pop().split(".")[0];
       try {
         await cloudinary.uploader.destroy(`products/${publicId}`);
-        console.log("Image deleted from cloudinary");
-        res.status(200).json({messae:"Product deleted Successfully"})
       } catch (error) {
-        console.log("Error deleting image from cloudinary:", error);
+        console.log("Error deleting image from Cloudinary:", error.message);
       }
     }
-    await Product.findByIdAndDelete(req.params.id);
-    res.status(200).json({message:"Product deleted Successfully from database"});
+
+    await product.deleteOne(); 
+    res.status(200).json({ message: "Product deleted successfully" });
+
   } catch (error) {
     console.log("Error in deleteProducts:", error);
     res.status(500).json({ message: "Internal server error while deleting product" });
   }
-}
+};
